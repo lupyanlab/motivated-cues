@@ -1,0 +1,5 @@
+#!/usr/bin/env Rscript
+library(devtools)
+pkg_name <- "motivatedcues"
+document(pkg_name)
+install(pkg_name)
