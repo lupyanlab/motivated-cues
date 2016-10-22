@@ -1,0 +1,267 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Technical:
+%
+% Introduction:
+%
+% Experiment 1:
+%	by-item stats
+% 	add norming data one-liner
+%	final stats
+%	final figures
+%
+% Experiment 2:
+%	make figure for stimuli
+%	final stats
+%	final figures
+%
+% Experiment 3:
+%	double check statistics
+%	insert figures
+%
+% Experiment 4:
+%	eye tracker hardware information
+%	final participant count
+%	final statistics
+%	insert figures
+%
+% Discussion:
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt, titlepage]{article}
+
+\usepackage[margin=1.0in]{geometry}
+\usepackage{apacite}
+\usepackage{titlesec}
+\usepackage{boxedminipage}
+\usepackage{setspace}
+
+\usepackage{ifpdf}
+\usepackage[pdftex]{graphicx}
+\DeclareGraphicsExtensions{.pdf, .png, .jpg}
+
+\newcommand{\subscript}[1]{\ensuremath{_{\textrm{#1}}}}
+
+\titleformat{\subsubsection}[runin]{\bfseries}{\thesection}{1.5em}{}
+
+% \doublespacing
+\begin{document}
+
+\input{./motivatedcues_title.tex}
+
+\begin{abstract}
+
+\end{abstract}
+
+\section*{Introduction}
+Conceptual knowledge is acquired through experiences in a variety of sensory-motor modalities \cite{Hoffman:2013hl}. Consequently, the same concept can be activated by a variety of cues. Are all such cues to the same concept basically equivalent, differing only in strength of association?
+
+We investigated this question by comparing two auditory cues to the same concept: verbal category labels (e.g., the word ``dog'') and unambiguous natural sounds (a dog $<$bark$>$). Natural sounds index a particular source; we say they are ``motivated'' cues to a concrete instance in the environment. Unlike natural sounds, category labels are ``unmotivated'': cues that functionally abstract across individual instances. Similar divisions have been drawn in the history of psychology \cite<e.g.>{Potter:1975wr}, but the purpose of this paper is not to deny that experience causally determines the effectiveness of various cues in activating a given concept. Instead, the experiments described here explore how a difference in ``motivation'' opens a fascinating variety of ways to experience the world.
+
+If our goal is to demonstrate how different cues activate the same concept differently, our first step is finding distinguishable cues to the same concept. Verbal labels and natural sounds are \textit{a priori} equivalent cues to a concept if only in that they are both acoustic signals that are learned in similar ways \cite<e.g., in that recognition of both isolated speech and natural sounds varies as a function of familiarity, environmental frequency>{Ballas:1993to}. At the same time, learning to recognize natural sounds cannot be reduced to the act of applying a known label a new percept \cite{Stuart:1995tg,Stuart:1996uk,Schon:2010vo,Aramaki:2010up}.
+
+For concepts with unambiguous natural sounds (e.g., a cat $<$meow$>$; a doorbell $<$ring$>$), both cues have been shown to activate similar semantic networks. For example, both labels and sounds elicit comparable N400 event related potentials \cite{Cummings:2006eq,VanPetten:1995vl}---a coarse index of semantic processing---even when the identification of the natural sound is incidental to task demands \cite{Orgs:2006ig,Orgs:2007kz}.
+
+Given these parallels between category labels and natural sounds, it is surprising that category labels appear to activate concepts in a unique way. For example, \citeA{Lupyan:2012cp} found that participants asked to verify an image as a member of a cued category responded significantly faster to label cues than to sound cues. This label advantage held across multiple cue-to-image delays and even extended to novel categories of alien instruments with learned labels and ``sounds''---evidence that the difference between labels and sounds is not entirely attributable to a difference signal ambiguity.
+
+How then should we understand the relationship between category labels and natural sounds? There are of course many important differences between labels and sounds; labels are discrete, reproducible, and often learned in the absence of any physical referent, to name a few. Most importantly, however, is that natural sounds have a causal relationship with a particular physical source \cite{Ballas:1987ux}. To use a simple example, big dogs---and agitated dogs---have deeper barks. Of course, big humans---and agitated humans---also have deeper ``barks'' \cite{Rendall:2007cj}, but the size of a speaker in no way constrains the meaning of speech. The meaning of a motivated cue, however, is still highly constrained \cite{Hall:2013vl}. 
+
+One might even posit the meaning of a motivated cue \textit{is} this constraint. To borrow an analogy from \citeA{Fowler:1990ul}, instead of ``seeing'' a lawfully distored array of electromagnetic signals, we see an object in the world (that structurally distorts light waves). Similarly, instead of ``hearing'' an acoustic waveform, we hear the source of the sound.
+
+Human perceivers are able to exploit such regularities in the acoustic environment, not only in determining the size of dogs \cite{Taylor:2008hv}, but also for determining somewhat obscure physical dimensions like the shape of resonating plates \cite{KunklerPeck:2000uy}, the length of wooden dowels \cite{Carello:1998eba}, or even the hardness of percussion mallets \cite{Freed:1990vd}.
+
+If auditory perception---indeed all perception---is a complex process of recreating the source \cite{Clark:2012vfa}, then what is the source of a category label? First we must acknowledge that speech perception is not strictly about acoustic information \cite{Massaro:2004ux,McClelland:2006jc}. Next, abandoning the notion of word meanings as entries in a mental lexicon \cite{Elman:2004jc} makes calling category labels ``unmotivated'' a bit clearer. Labels activate categorical representations of concepts. This abstract notion of ``categorical'' has been explored in a series of studies \cite<see>{Lupyan:2012ev}. Labels activate categorical representations that sharpen between-category boundaries \cite{Lupyan:2007tx} while blurring within-category differences \cite{Lupyan:2008fs}.
+
+We believe the distinction between motivated and unmotivated cues pins down an important difference between language and nonverbal communication \cite{Burling:1993us}. In the four experiments that follow, we intend to quantify this difference. The null hypotheses that will be tested are (a) that natural sounds are simply less effective but functionally identical to category labels, and (b) that natural sounds are ``equal but opposite'' category labels; labels are cues to linguistic and cultural categories, while natural sounds are cues to some other type of category.
+
+\section{Experiment 1}
+Do natural sounds activate a representation of the source of the sound? Consider the type of chainsaw one might expect after hearing a chainsaw revving (Fig.~\ref{fig:chain}). In Experiment 1 we compared natural sounds to category labels in the processing of active and silent images. If natural sounds index a particular causal source, then natural sound cues will lead to faster processing of sound-producing images.
+
+\begin{figure}[h!]
+	\centering
+	\caption{Sample images for \textsc{chainsaw} used in Experiment 1. Do label and sound cues lead to different expectations about subsequent visual information?}
+	\label{fig:chain}
+	\includegraphics[width=0.6\textwidth]{../figure/fig-chainsaw.png}
+\end{figure}
+
+\subsection{Methods}
+\subsubsection*{Participants}
+14 University of Wisconsin--Madison undergraduates participated in Experiment 1 in exchange for course credit.
+
+\subsubsection*{Materials}
+Two audio clips (label$_{female}$, sound) and four color photographs (two silent, two action) for each of twelve categories of familiar animals and artifacts\footnote{Categories used in Experiment 1: \textsc{baby, bee, bird, bowling ball, car, cat, chainsaw, dog, keyboard, river, scissors, toilet}} were used in Experiment 1.
+
+To verify the validity of the image type manipulation, participants in a separate image rating study evaluated each picture on one of two dimensions (category typicality or sound match) using a 5-point Likert scale. For category typicality, participants viewed e.g., a dog, and were asked: ``How typical is this dog of dogs in general?'' For sound match, participants listened to e.g., a bird $<$chirp$>$, saw a picture of a bird, and were asked: ``How well does that sound go with this picture?'' As expected, the silent images were rated higher on category typicality ($M=4.57, SD=0.29$)  than on sound match ($M=3.49, SD=0.66$), while actives images were rated higher on sound match ($M=4.37, SD=0.52$) than on category typicality ($M=4.05, SD=0.27$).
+
+\subsubsection*{Procedure}
+Participants were tested in isolated rooms and wore headphones for the auditory cues. Participants were asked to verify images as members of a cued category. If the cue and image matched (e.g., a $<$meow$>$ followed by a picture of a cat), participants pressed the button for `Yes' on a gaming controller; if not (e.g., the word `cat' followed by a picture of a car), they pressed the button for `No'.
+
+Each trial began with a 250 msec fixation cross. Images appeared 1 second after the offset of the auditory cue and disappeared after each response. This long delay ensured that participants had ample time to process the sounds and labels \cite<see>{Lupyan:2012cp}. Auditory performance feedback was provided on all trials.
+
+Participants completed a total of 576 trials (50\% matching). Cue type (label, sound) and image type (silent, active) varied randomly within-subjects. The experiment took 30 minutes to complete.
+
+\subsection{Results and Discussion}
+The following criteria are applied to data in Experiments 1-3: Only correct responses on matching trials (`Yes' responses) were analyzed. Verification speeds less than 250 msec or greater than 1500 msec were considered errant and excluded (3.11\% of total trials). Overall response accuracy was high, $M_{acc}=96\%$. By-item and by-subject accuracies more than 3 standard deviations below the group mean were considered invalid. Only responses to the natural sound cue for \textsc{river} were removed $M_{acc}(river)=0.91$, \%3.98 of total trials.
+
+We fit the data with linear mixed regression \cite{Bates:2013lme} predicting verification speeds from the interaction between cue type (label, natural sound) and image type (action, silent). I allowed intercepts and slopes for all cue type $\times$ image type effects to vary by-subject, and intercepts to vary by-item (picture file). Correlations between random effect parameters were not estimated. All \textit{p}-values were computed using Monte Carlo Markov Chain sampling with 10,000 simulations.
+
+Responses following label cues ($M=609$ msec) were reliably faster than responses to natural sound cues ($M=639$ msec), $t(13)=3.47, p=0.003$. This effect was moderated by image type such that the label advantage was greater for silent, category typical images than for active images, $t(13)=-2.35, p=0.032$ (see Fig.~\ref{fig:tyv}).
+
+\begin{figure}[h!]
+	\centering
+	\caption{Participants were asked to verify images as members of a cued category. Responses following label cues were significantly faster than responses following sound cues. This label advantage was greater for the silent, category typical images than the action, sound-matched images. Unexpectedly, active images were not verified more quickly than silent images following a natural sound cue.}
+	\label{fig:tyv}
+	\includegraphics[width=0.6\textwidth]{../figure/plot-tyv.png}
+\end{figure}
+
+The results of Experiment 1 supported the hypothesis that labels active concepts differ\-ently\cite{Lupyan:2012cp}. Unlike sounds, labels activate a more category-typical representation. However, cuing with a natural sound did not speed verification of images depicting the action that created the sound.
+
+\section{Experiment 2}
+A possible explanation for failing to find faster verification speeds for action images following a natural sound cue in Experiment 1 is that natural sounds as motivated cues do not index the act, they index the identity. For example, a dog $<$bark$>$ may not activate ``dog with jaw open'' as much as it activates ``dog of a certain size'' (Fig.~\ref{fig:dogs}). In Experiment 2 we tip the scales in favor of natural sounds. If natural sounds index a particular source, then verification speeds for sound-congruent images should be faster than for sound-incongruent images.
+
+\begin{figure}[h!]
+	\centering
+	\caption{Sample images for \textsc{dog} used in Experiment 2. Participants heard natural sound cues associated with both within-category variations. As a control for similar within-category variation, label cues were also recorded from two speakers (male and female).}
+	\label{fig:dogs}
+	\includegraphics[width=0.8\textwidth]{../figure/fig-tyi.png}
+\end{figure}
+
+\subsection{Methods}
+\subsubsection*{Participants}
+43 University of Wisconsin---Madison undergraduates participated in Experiment 2 in exchange for course credit.
+
+\subsubsection*{Materials}
+Four digital audio clips (label$_{male}$, label$_{female}$, sound$_{A}$, sound$_{B}$; see Table~\ref{tbl:tyi}) and four color photographs for each of six categories of familiar animals and artifacts were used in Experiment 2. All audio clips trimmed to 600 msec.
+
+\begin{table}[h]
+	\centering
+    \begin{tabular}{| r || c | c |}
+    	\hline
+    	\bfseries Category & \bfseries Version A & \bfseries Version B \\ \hline \hline
+    	bird & hawk & songbird \\ \hline
+    	dog & rottweiler & yorkie \\ \hline
+    	drum & bongo & drumkit \\ \hline
+    	guitar & acoustic & electric \\ \hline
+    	motorcycle & dirtbike & Harley \\ \hline
+    	phone & cellphone & rotary \\
+    	\hline
+    \end{tabular}
+    \caption{Categories with distinct within-category sounds used in Experiment 2. A sound-congruent image was one which matched the natural sound cue at this more precise level. If cued with $<$bird$_{hawk}>$, a picture of a hawk is sound-congruent but a picture of a songbird is sound-incongruent, even though both images elicited the same response.}
+    \label{tbl:tyi}
+\end{table}
+
+\subsubsection*{Procedure}
+Experiment 2 was conducted in the same manner as Experiment 1. The instructions were modified to emphasize category-level matches; participants were told that if they heard e.g., a guitar chord they should respond `Yes' to any subsequent picture of a guitar. As in Experiment 1, images appeared 1 second after auditory cue offset.
+
+Participants completed a total of 383 trials (50\% matching). Cue type (label$_{male}$, lab\-el$_{female}$, sound$_{a}$, sound$_{b}$) and picture type (sound-congruent, sound-incongruent) varied randomly within-subjects. The experiment took 30 minutes to complete.
+
+\subsection{Results and Discussion}
+Correct responses on matching trials were analyzed as in Experiment 1 (1.60\% of total trials excluded). We fit the data with linear mixed regression predicting response times from the four cue types: label$_{male}$, label$_{female}$, sound$_{congruent}$, sound$_{incongruent}$. We created a set of three orthogonal contrasts with the hypothesis that verification speeds would be fastest following both label types and slowest following incongruent sounds with congruent sounds falling between. The contrast of interest was significant, $t(42)=8.78, p=0.0001$, and the remaining contrasts did not account for a significant amount of residual between-group variance, $\chi^2(4)=8.64, p=0.07$, \cite{Abelson:1997vx}. This result verifies (a) that congruent sounds resulted in faster verifications than incongruent sounds, (b) that labels resulted in faster verifications than congruent sounds, and (c) that there were no differences between responses to male and female speakers (see Fig~\ref{fig:tyi}).
+
+\begin{figure}[h!]
+	\centering
+	\caption{Cuing with a label---independent of speaker gender---resulted in significantly faster verifications than cuing with natural sounds even when the to-be-verified image matched the natural sound at an arguably more-specified level.}
+	\label{fig:tyi}
+	\includegraphics[width=0.5\textwidth]{../figure/plot-tyi.png}
+\end{figure}
+
+In Experiment 2 we found that natural sounds activated a representation associated with the identity of a likely causal source. However, labels still lead to faster verifications even when the natural sound is arguably more specified.
+
+\section{Experiment 3}
+Do natural sounds activate a representation of the source of a sound \textit{at a particular time}? Motivated cues index a multimodal cause, or, to put it differently, multisensory integration---a cue in one modality facilitating processing in another modality---reflects learned semantic knowledge \cite{Fiebelkorn:2009he,Hein:2007kp,Chen:2011kc,Laurienti:2004ki}. In Experiment 3, we investigated if label and natural sound cues influence recognition speed based not only on the fit between an auditory cue and an image, but also on the delay between the cue and the image. If natural sounds index a particular source at a particular time, then sound-matched images should be recognize more quickly when presented simultaneously with the sound than less sound-matched images.
+
+\subsection{Methods}
+\subsubsection*{Participants}
+56 University of Wisconsin--Madison undergraduates participated for course credit.
+
+\subsubsection*{Materials}
+Spoken label and natural sound audio clips for ten of the twelve\footnote{Categories \textsc{river} and \textsc{toilet} were excluded due to insufficient within-category variation.} categories used in Experiment 1 were used in Experiment 3. Four new color photographs per category with a ``continuous'' variety of sound match properties were obtained.
+
+To quantify the image type manipulation, image ratings (category typicality and sound match) were collected via Amazon's Mechanical Turk (mTurk). mTurk workers ($N=42$) heard either spoken labels or natural sounds, and were presented 8 to 10 pictures for each category with the following instructions: ``Please listen to the following audio clip and report how well each image fits with the audio file.'' Ratings were given on a 5-point Likert scale. From these data, we selected 4 images for each category roughly corresponding to the quadrants depicted in Fig.~\ref{fig:quad}. There was a positive correlation between category-typicality and sound-match (Pearson's \textit{r}=$0.27$). These ratings were standardized (\emph{z}-score) and used as predictors in subsequent analyses.
+
+\begin{figure}[h!]
+	\centering
+	\caption{Sample images from \textsc{bird} used in Experiment 3. Category typicality and sound-match ratings can be conceptualized as independent measures, though they are undoubtedly correlated for categories with unambiguous natural sounds (the most typical dogs are likely to have the most typical barks).}
+	\label{fig:quad}
+	\includegraphics[width=0.8\textwidth]{../figure/fig-typgrid.png}
+\end{figure}
+
+\subsubsection*{Procedure}
+Experiment 3 was conducted in the same manner as Experiments 1 and 2. Participants completed a total of 427 trials (75\% matching). This increase in response validity compared to Experiments 1 and 2 allowed us to fully counterbalance all trial variables on matching trials while keeping the length of the experiment manageable. The target image was either presented simultaneously with the onset of the auditory cue, or delayed the offset of the auditory cue by 400 msec.
+
+Cue type (label, natural sound), picture exemplar (four per category), and delay (simultaneous, delayed) varied randomly within-subject. The experiment took 30 minutes to complete.
+
+\subsection{Results and Discussion}
+Only correct responses on matching trials (`Yes' responses) were analyzed. Verification speeds less than 250 msec or greater than 1500 msec were considered errant and excluded (1.21\% of total trials). By-item and by-subject accuracies were analyzed the same as in Experiments 1 and 2. Responses to the natural sound cue for the category \textsc{scissors}, $M_{acc}(scissors)=0.91$, and the data from one participant, ($M_{acc}(subject)=0.89$), were removed.
+
+We fit the data with linear mixed regression predicting verification speeds from 2 three-way interactions: cue type $\times$ delay $\times$ category typicality, and cue type $\times$ delay $\times$ sound match. We allowed intercepts and slopes for all cue type $\times$ delay effects by-subject, and intercepts to vary by-item (picture file). Other model parameters were the same as in the previous experiments.
+
+Responses to label cues were again reliably faster than responses to natural sound cues, $t(40)=8.82, p<0.0001$. The effect of cue type was moderated by delay, $t(40)=-2.46, p=0.016$, such that the label advantage was greater on simultaneous trials than it was on delayed trials (Fig.~\ref{fig:typ}).
+
+Category typicality was a reliable predictor of RTs, $t(41)=-2.6, p<0.011$. Importantly, this effect remained constant across both cue types and both image delays. That is, the RT advantage for more category-typical images over less category-typical images was equivalent for label and natural sound cues, on both simultaneous and delayed trials (Fig.~\ref{fig:typ}, left column).
+
+There was a reliable three-way interaction between sound-match, cue type, and image delay, $t(41)=2.2, p=0.023$. On simultaneous presentation trials, RTs following natural sound cues decreased as the sound-match of the image increased, while RTs following label cues did not vary by sound-match, (Fig.~\ref{fig:typ}, upper right). However, there was no such cue type $\times$ sound-match interaction at the 400 msec delay (Fig.~\ref{fig:typ}, lower right). That is, sound-match predicted RTs following natural sounds and not labels when the delay was simultaneous, but not with a 400 msec delay.
+
+\begin{figure}[h!]
+	\centering
+	\caption{Speed of verification of category typical and sound producing images as a function of cue type and delay.}
+	\label{fig:typ}
+	\includegraphics[width=0.8\textwidth]{../figure/plot-typ.png}
+\end{figure}
+
+To summarize, image ratings for category-typicality and sound-match correlated with response times based on the cue and the cue-image delay. First, when presented with a spoken label, RTs were predicted by category-typicality of the image, and this effect held across both cue-to-image delay periods. Second, when presented with a natural sound, the sound-match of the image correlated with the response time to that image, \textit{but only when the cue-image pair was presented simultaneously}. That is, hearing a natural sound improved processing of a particular kind of visual image: a picture depicting an object that could have made the sound at the moment the sound was detected. These results support the hypothesis that motivated cues index a particular multimodal source.
+
+These findings afford an intriguing prediction: In Experiments 1-3, task demands required explicitly performing a category match between an auditory cue and an image. However, if natural sounds as motivated cues index a particular multimodal source, then natural sounds should drive perception of a particular source even without explicitly attending to the auditory cues \cite{Orgs:2008dk}.
+
+\section{Experiment 4}
+Do motivated cues index a particular source regardless of task demands? Previous studies have demonstrated that task-irrelevant category labels draw visual attention \cite{Salverda:2011dx} and that natural sounds guide visual search amid distractors \cite{Iordanescu:2008hm}. In Experiment 4 we investigated if labels and natural sounds guide visual attention to different types of images when the auditory cues are made irrelevant to the participants task.
+
+\subsection{Methods}
+\subsubsection*{Participants}
+30 University of Wisconsin--Madison undergraduates participated for course credit.
+
+\subsubsection*{Materials}
+Images and audio clips were the same as those used in Experiment 3.
+
+\subsubsection*{Procedure}
+Participants searched a 2$\times$2 image grid to find a target image to be highlighted in a green frame. They were informed the experimenters were studying how listening to sounds would help or hurt their speed at performing this task. They were also told the experimenters were curious where they would look during the task, which necessitated the eye tracker.
+
+Each trial began with a fixation circle that turned green when fixated. Participants could only begin each trial by clicking the green dot, ensuring both accurate calibration and foveal origin on each trial. Auditory cues were played over the computer speakers. The target appeared 2 seconds after the onset of the 2$\times$2 image grid. Participants ended a trial by clicking the mouse within the target frame.
+
+All images in a given trial comprised members of the same category. Auditory cues varied randomly within-subject and were present on every trial. Approximately half of the participants (N=13) were in the simultaneous condition in which the auditory cue was played concurrently with the onset of the image grid. These data are analyzed first. The remaining participants (N=17) were run in a subsequent control condition in which the appearance of the images lagged the auditory cue by 400 msec---the same delay as in Experiment 3.
+
+\subsection{Results and Discussion}
+Only fixation events (as defined by the EyeLink's internal criteria) occurring between the onset of the image grid and the onset of the target frame were analyzed. 
+
+First we tested if participants in the simultaneous condition looked at systematically different types of images based on the presented cue \textit{before} the onset of the target. Raw image ratings reported in Experiment 3 were normalized for each trial (that is, for each category) to force random search of the image grid to reflect a net 0.0 for both category typicality and sound match image ratings. We fit linear mixed regression models predicting per-trial average category typicality and per-trial average sound match of fixated images from cue type, with relevant random effects. The average category typicality was significantly less than 0, $t(12)=-3.34, p=0.003$, but did not differ by cue type, $t(12)=1.58, p=0.11$. The average sound match was significantly greater than 0, $t(12)=2.29, p=0.027$, and was significantly greater following natural sound cues than label cues, $t(12)=1.96, p=0.0502$ (Fig.~\ref{fig:tys-ratings}). However, this effect was washed out when delay (data from the control condition) was added to the model $t(29)=-1.21, p=0.23$.
+
+\begin{figure}[h!]
+	\centering
+	\caption{There was a preference for sound matched images following natural sound cues.}
+	\label{fig:tys-ratings}
+	\includegraphics[width=0.6\textwidth]{../figure/plot-tys-ave.png}
+\end{figure}
+
+Next we tested if participants looked systematically longer at a particular image during a trial. We rank-ordered the images for each trial in terms of decreasing image rating (sound match, category typicality), and summed the per-trial fixation duration for each image. We fit a linear mixed regression model predicting average per-trial fixation duration from cue type $\times$ rank-ordered image. We created a set of three orthogonal contrasts with the hypothesis that summed fixation duration would be greatest for the highest ranked image in terms of category typicality and sound match. There was a significant interaction between cue type and the contrast of interest, $t(29)=3.56, p=0.0004$, and the remaining contrasts did not account for a significant amount of residual between-group variance, $\chi^2(8)=12.9, p=0.12$ \cite{Abelson:1997vx}. This effect was strengthened by a similar effect in the delay condition, $t(29)=8.01, p=0.0001$ (Fig.~\ref{fig:tys-dur}).
+
+\begin{figure}[h!]
+	\centering
+	\caption{There was a preference for sound matched images following natural sound cues.}
+	\label{fig:tys-dur}
+	\includegraphics[width=0.5\textwidth]{../figure/plot-tys-duration.png}
+\end{figure}
+
+In Experiment 4 we found sound cues seem to direct attention toward more sound-typical images, even when processing the sound cue has no relevance for the task. Moreover, sound cues directed attention toward the most likely source of the sound, while labels lead to more even search of all category members. However, the conclusions drawn from Experiment 4 must be qualified by inconsistent data from the control condition. 
+
+\section*{General Discussion}
+Four experiments garnered support for a distinction between motivated and unmotivated cues by demonstrating ways in which category labels and natural sounds systematically differ in activating the same concept. In Experiments 1-3 we used category verification tasks to probe the nature of conceptual activations following both labels and sounds. Labels as unmotivated cues activate a more category-typical representation when presented a single exemplar (Experiments 1, 2, 3), but also make all members of a category appear more similar (Experiment 4). While natural sounds failed to activate a representation of the action making the sound (Experiment 1), one can tease apart the representation of the source of the sound by using within-category variation (Experiment 2). This source is multimodal, leading to the multisensory integration effects (time sensitivity of the natural sound $\times$ sound match interaction) seen in Experiment 3. Lastly, natural sounds are inherently motivated in that processing of an individual causal source is nearly inevitable upon hearing a natural sound (Experiment 4).
+
+The most significant distinction between motivated and unmotivated cues is that motivated cues are obligated to index a multisensory source. As such, natural sounds are not the only motivated cue. Most sensory input is in fact motivated, such images \cite{Beauchamp:2004ts,Brunel:2010hta} and even smell \cite{Gottfried:2003wj}. Of course, motivated cues are also inherent in speech \cite{vonKriegstein:2006cc,Shintel:2007co,Rendall:2007cj}, but language can be stripped of it's motivated aspects in a way that natural sounds cannot.
+
+\subsubsection*{Conclusion}
+We found verbal and nonverbal cues activate different conceptual representations evident in patterns of response latencies to recognize and verify different category exemplars. In a replication of previous findings, verbal cues facilitated recognition of category-typical images. We extended these findings to discern the specifics of conceptual representations activated via natural sound cues: Natural sounds facilitated visual processing of images that fit with the presented sound, but only if the sound and image were presented simultaneously. Critically, these effects were mediated by time, with natural sound cues improving responses to sound-matched images only during simultaneous presentation.
+
+\bibliographystyle{apacite}
+\bibliography{motivated}
+
+\end{document}
