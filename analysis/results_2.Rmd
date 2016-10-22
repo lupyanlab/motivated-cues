@@ -1,0 +1,179 @@
+# Experiment 2
+```{r setup, echo=FALSE, message=FALSE}
+opts_chunk$set(cache.path='./cache/exp2/', dev='jpeg', echo=FALSE, 
+               message=FALSE, cache=TRUE, results='hide')
+library(plyr)
+library(reshape2)
+library(pander)
+library(lme4)
+library(AICcmodavg)
+library(ggplot2)
+library(grid)
+library(RColorBrewer)
+library(pbkrtest)
+library(gridExtra)
+```
+In Experiment 2 we investigated how the effectiveness of category labels and natural sounds in cuing categories of familiar animals and artifacts varies by time. While category labels are often heard in the absence of any referent, natural sounds are temporally contingent on the presence of a source. Similar to Experiments 1A and 1B, we manipulated sound congruence in Experiment 2 by selecting images that varied in resemblence to the sound source. We manipulated _temporal congruence_ by comparing performance on simultaneous trials---in which the target image is presented at the same time as the onset of the auditory cue---to performance on delayed trials. To the extent that natural sounds activate visual features of a specific source _at a specific time_, natural sound cues will lead to faster verification of congruent images on simultaneous trials.
+
+## Methods
+```{r compile}
+source('./R/compile.R')
+
+# compile the data
+dir <- './data/TYP'
+key <- 'TYP'
+header <- 'header.txt'
+raw <- compile(dir, key, header)
+
+info <- read.csv('./data/TYP/subjectinfo.csv', header=T, stringsAsFactors=F)
+keep <- c(names(info)[2], names(info)[4], names(info)[7])
+info <- info[,keep]
+names(info) <- c('subjCode', 'room', 'compliance')
+
+qst <- read.csv('./data/TYP/questionnaire.csv', header=T, stringsAsFactors=F)
+keep <- c(names(qst)[2], names(qst)[3], names(qst)[4], 
+          names(qst)[5], names(qst)[15]) 
+qst <- qst[,keep]
+names(qst) <- c('subjCode', 'room', 'age', 'gender', 'nativeSpeaker')
+qst[!(qst$nativeSpeaker %in% c('Yes','No')), 'nativeSpeaker'] <- 'No'
+qst[qst$subjCode == 'TYP1_107' & qst$room == 'Jerry', c('subjCode','room')] <- c('TYP1_105','Kramer')
+
+# merge all
+info <- merge(info, qst, all.x=T)
+info <- info[info$subjCode != 'TYP1_124',] # didn't complete the whole experiment due to technical difficulties
+raw <- raw[raw$subjCode != 'TYP1_124',]
+raw <- merge(raw, info, all.x=T)
+```
+
+### Participants
+```{r participants}
+N <- length(info$subjCode) # number of participants
+gender <- table(info$gender) # gender
+age <- range(info$age, na.rm=T) # average age
+```
+`r N+1` University of Wisconsin--Madison undergraduates (`r gender['Female']` female; `r age[1]` to `r age[2]` years old) participated in Experiment 2 in exchange for course credit. The data from one participant was incomplete due to experiment error and excluded.
+
+### Materials
+```{r materials}
+categories <- unique(raw[,c('picCategory')])
+categories <- sort(categories)
+
+ratings <- read.csv('./data/TYP/imageratings.csv', header=T, stringsAsFactors=F)
+ratings <- ratings[,c('picFile', 'type', 'zSound', 'zLabel')]
+raw <- merge(raw, ratings, all.x=T)
+raw <- raw[order(raw$subjCode, raw$curTrialIndex),]
+```
+
+```{r ratings-plot}
+ggplot(ratings, aes(x = zSound, y = zLabel, color = cat)) +
+  geom_point(size = 3.0) +
+  geom_smooth(aes(group = 1), method = "lm", se = F, color = "black") +
+  coord_cartesian(xlim = c(-2.5, 1.5), ylim = c(-2.5, 1.5)) +
+  scale_x_continuous("Sound-Image Congruence (z-score)", breaks = seq(-2.5, 1.5, by = 0.5)) +
+  scale_y_continuous("Category Typicality (z-score)", breaks = seq(-2.5, 1.5, by = 0.5)) +
+  scale_color_discrete("Category")
+ggsave("./figure/ratings.pdf")  
+```
+
+In Experiment 2 we tested participants using `r length(categories)` categories[^cat] of familiar animals and artifacts. Auditory cues comprised a single spoken label cue (female speaker) and a single natural sound cue for each category. We gathered a new set of images and collected sound congruence ratings online using Amazon's Mechanical Turk (mTurk). mTurk workers (_N_ = 42) listened to each natural sound and rated 8 to 10 images per category on a 5-point Likert scale corresponding to how well the image fit the sound. We selected 4 images per category that varied in sound congruence ratings.
+
+[^cat]: Categories used in TYP: `r paste0(categories, collapse=', ')`.
+
+### Procedure
+```{r trials}
+numpractice <- length(raw[raw$whichPart=='practice','curTrialIndex'])/N
+numtest <- length(raw[raw$whichPart=='test','curTrialIndex'])/N
+```
+Participants in Experiment 2 completed nominally the same task as those in Experiments 1A and 1B: they decided as quickly as possible if the picture they saw came from the same category as the word or sound they heard. Each participant completed `r numpractice` practice trials and `r numtest` test trials (75% matching[^mat]), and auditory performance feedback was given after each trial. On a random half of the trials, the auditory cue and the image were presented simultaneously; on the remaining trials the image was presented 400 msec after the offset of the auditory cue.
+
+[^mat]: This increase in response validity allowed us to fully counterbalance all trial variables on matching trials while keeping the length of the experiment manageable.
+
+## Results
+```{r clean}
+source('./R/clean.R')
+
+raw$cue_typeC <- ifelse(raw$cueType=='label', -0.5, 0.5)
+raw$delay <- ifelse(raw$soa == 0, 'simultaneous', 'delayed')
+raw$delayC <- ifelse(raw$delay == 'simultaneous', -0.5, 0.5)
+raw$trialID <- paste(raw$soundFile, raw$picFile, sep=':')
+
+scissors_sound_trials <- (raw$soundFile == 'scissors_sound')
+scissors_sound_acc <- round(mean(raw[scissors_sound_trials, 'isRight']) * 100, 0)
+scissors_sound_perct <- round(sum(scissors_sound_trials)/length(raw$isRight) * 100, 0)
+
+cleaned <- clean(raw[!(scissors_sound_trials), ])
+typ <- cleaned$data
+```
+
+```{r stats-prep}
+rows <- ((typ$isMatch==1) & (typ$isRight==1))
+remove <- c('room', 'seed', 'responseDevice', 'data', 'initials', 'exp', 
+            'date', 'cueAnimate', 'picAnimate', 'sameAnimacy', 'expTimer', 
+            'whichPart')
+write.csv(typ[rows, !(names(typ) %in% remove)], './data/typ-final.csv', row.names=FALSE)
+```
+Overall accuracy was high (_M_ = `r cleaned$acc`%), except responses to the natural sound cue for scissors cutting paper (_M_ = `r scissors_sound_acc`%). Over half of the participants (24 out of 41 participants) reported difficulties with these trials during debriefing, and these trials were excluded (`r sum(scissors_sound_trials)` trials; <`r scissors_sound_perct`% of total). Response times (RTs) shorter than `r cleaned$minRT` msec or longer than `r cleaned$maxRT` msec were considered errors and removed (`r cleaned$num_removed` trials, `r cleaned$perct_removed`% of total). RTs for correct responses on matching trials were analyzed as in Experiments 1A and 1B.
+
+```{r load-data}
+source('./R/report_results.R')
+typ <- read.csv('./data/typ-final.csv', header=T, stringsAsFactors=F)
+```
+
+```{r typicality}
+set.seed(342)
+typic <- lmer(rt ~ zLabel + (1+zLabel|subjCode) + (1|trialID), data=typ, REML=F)
+typic.simple <- lmer(rt ~ 1 + (1+zLabel|subjCode) + (1|trialID), data=typ, REML=F)
+typic.modcomp <- reportModCompChiSqr(typic, typic.simple, 'zLabel')
+typic.modcomp['text']
+```
+
+```{r typicality-new}
+typic.new <- reportNewStats(typic, 'zLabel')
+typic.new['text']
+```
+
+```{r delay}
+set.seed(245)
+delay <- lmer(rt ~ delayC + zLabel + (1+delayC|subjCode) + (1|trialID), data=typ, REML=F)
+delay.simple <- lmer(rt ~ 1 + zLabel + (1+delayC|subjCode) + (1|trialID), data=typ, REML=F)
+delay.modcomp <- reportModCompChiSqr(delay, delay.simple, 'delayC')
+delay.modcomp['text']
+```
+
+```{r delay-new}
+delay.new <- reportNewStats(delay, 'delayC')
+delay.new['text']
+```
+
+```{r cuetype}
+set.seed(532)
+cue <- lmer(rt ~ cue_typeC + delayC + zLabel + (1+cue_typeC|subjCode) + (1|trialID), data=typ, REML=F)
+cue.simple <- lmer(rt ~ 1 + delayC + zLabel + (1+cue_typeC|subjCode) + (1|trialID), data=typ, REML=F)
+cue.modcomp <- reportModCompChiSqr(cue, cue.simple, 'cue_typeC')
+cue.modcomp['text']
+```
+
+```{r cuetype-new}
+cue.new <- reportNewStats(cue, 'cue_typeC')
+cue.new['text']
+```
+
+```{r inter}
+inter <- lmer(rt ~ cue_typeC * delayC * zSound + zLabel + (1+cue_typeC|subjCode) + (1|trialID), data=typ, REML=F)
+inter.simple <- lmer(rt ~ cue_typeC * delayC * zSound + zLabel - cue_typeC:delayC:zSound + (1+cue_typeC|subjCode) + (1|trialID), data=typ, REML=F)
+inter.modcomp <- reportModCompChiSqr(inter, inter.simple, 'cue_typeC:delayC:zSound')
+inter.modcomp['text']
+```
+
+```{r inter-new}
+inter.new <- reportNewStats(inter, 'cue_typeC:delayC:zSound')
+inter.new['text']
+```
+
+```{r betas}
+typ.simul <- typ[typ$delayC == -0.5,] 
+cue.by.zsound <- lmer(rt ~ cue_typeC * zSound + zLabel + (1|subjCode) + (0+cue_typeC|subjCode) + (1|trialID), data=typ.simul, REML=T)
+cue.by.zsound.simple <- lmer(rt ~ cue_typeC * zSound - cue_typeC:zSound + zLabel + (1|subjCode) + (0+cue_typeC|subjCode) + (1|trialID), data=typ.simul, REML=T)
+cue.by.zsound.modcomp <- reportModCompChiSqr(cue.by.zsound, cue.by.zsound.simple, 'cue_typeC:zSound')
+cue.by.zsound.modcomp['text']
+```

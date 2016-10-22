@@ -1,0 +1,1 @@
+subjCode	seed	responseDevice	data	room	initials	exp	date	cueCategory	cueType	cueAnimate	soundFile	picCategory	picType	picAnimate	picFile	soa	isMatch	sameAnimacy	block	whichPart	curTrialIndex	expTimer	isRight	rt

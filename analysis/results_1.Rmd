@@ -1,0 +1,238 @@
+# Experiments 1A and 1B
+```{r setup, echo=FALSE, message=FALSE}
+opts_chunk$set(cache.path='./cache/exp1/', dev='jpeg', echo=FALSE, 
+               message=FALSE, cache=TRUE, results='hide')
+library(plyr)
+library(reshape2)
+library(pander)
+library(lme4)
+library(ggplot2)
+library(grid)
+library(RColorBrewer)
+library(pbkrtest)
+```
+In Experiments 1A and 1B we compared the effectiveness of category labels and natural sounds in cuing target categories of familiar animals and artifacts. Participants were asked to identify images as members of aurally cued categories. To the extent that natural sounds activate visual features of the specific source of the sound, natural sound cues should lead to faster verification of images that are _congruent_ with the sound. We manipulated natural sound-to-image congruence in Experiments 1A and 1B by testing participants using base level categories with two visually and aurally distinct subcategories (Fig. 1). In Experiment 1A we compared the effectiveness of label cues to that of natural sound cues that were either congruent or incongruent with the target image subcategory. In Experiment 1B we removed the sound incongruent trials, comparing label cues to subcategory congruent sounds only.
+
+![Acoustic and electric guitar](figure/guitars.jpg)
+
+## Methods
+```{r compile-tyi}
+source('./R/compile.R')
+
+# compile the data
+dir <- './data/TYI'
+key <- 'TYI1'
+header <- 'header.txt'
+raw.tyi <- compile(dir, key, header)
+
+# correct a coding error for the motorcycle category
+raw.tyi[raw.tyi$cue_file=='motor_sound_A','cue_version'] <- 'B'
+raw.tyi[raw.tyi$cue_file=='motor_sound_B','cue_version'] <- 'A'
+
+info.tyi <- read.csv('./data/TYI/subjectinfo.csv', header=T, stringsAsFactors=F)
+keep <- c(names(info.tyi)[2], names(info.tyi)[4], names(info.tyi)[7])
+info.tyi <- info.tyi[,keep]
+names(info.tyi) <- c('subjCode', 'room', 'compliance')
+
+qst.tyi <- read.csv('./data/TYI/questionnaire.csv', header=T, stringsAsFactors=F)
+keep <- c(names(qst.tyi)[2], names(qst.tyi)[3], names(qst.tyi)[4], 
+          names(qst.tyi)[5], names(qst.tyi)[15])
+qst.tyi <- qst.tyi[,keep]
+names(qst.tyi) <- c('subjCode', 'room', 'age', 'gender', 'nativeSpeaker')
+
+# merge
+info.tyi <- merge(info.tyi, qst.tyi, all.x=T)
+raw.tyi <- merge(raw.tyi, info.tyi, all.x=T)
+```
+
+```{r compile-tyo}
+# compile the data
+dir <- './data/TYO'
+key <- 'TYO'
+header <- 'header.txt'
+raw.tyo <- compile(dir, key, header)
+
+info.tyo <- read.csv('./data/TYO/subjectinfo.csv', header=T, stringsAsFactors=F)
+keep <- c(names(info.tyo)[2], names(info.tyo)[4], names(info.tyo)[7])
+info.tyo <- info.tyo[,keep]
+names(info.tyo) <- c('subjCode', 'room', 'compliance')
+info.tyo[info.tyo$subjCode=='TYO_101','subjCode'] <- 'TYO_v1_101'
+info.tyo[info.tyo$subjCode=='TYO_115' & info.tyo$room=='Jerry','room'] <- 'Kramer'
+
+qst.tyo <- read.csv('./data/TYO/questionnaire.csv', header=T, stringsAsFactors=F)
+keep <- c(names(qst.tyo)[2], names(qst.tyo)[3], names(qst.tyo)[4], 
+          names(qst.tyo)[5], names(qst.tyo)[15])
+qst.tyo <- qst.tyo[,keep]
+names(qst.tyo) <- c('subjCode', 'room', 'age', 'gender', 'nativeSpeaker')
+qst.tyo[qst.tyo$subjCode=='TYO_106' & qst.tyo$room=='George','subjCode'] <- 'TYO_107'
+
+# merge all
+info.tyo <- merge(info.tyo, qst.tyo, all=T)
+raw.tyo <- merge(raw.tyo, info.tyo, all.x=T)
+```
+
+### Participants
+```{r participants}
+info <- rbind(info.tyi, info.tyo)
+N <- length(info$subjCode)
+N.tyi <- length(info.tyi$subjCode)
+N.tyo <- length(info.tyo$subjCode)
+gender <- table(info$gender) # gender
+age <- range(info$age, na.rm=T) # average age
+```
+`r N` University of Wisconsin--Madison undergraduates (`r gender['Female']` female; `r age[1]` to `r age[2]` years old) participated in Experiment 1A (N = `r N.tyi`) and Experiment 1B (N = `r N.tyo`) in exchange for course credit.
+
+### Materials
+```{r materials}
+categories <- unique(raw.tyi[,c('pic_category','pic_type')])
+categories <- categories[order(categories$pic_category),]
+categories$version <- rep(c('a','b'), length(unique(categories$pic_category)))
+categories <- dcast(categories, pic_category ~ version, value.var='pic_type')
+categories[categories$pic_category %in% c('bird','dog','motor'), 'a'] <- c('songbird','yorkie','dirtbike')
+categories[categories$pic_category %in% c('dog','motor'), 'b'] <- c('rottweiler','roadbike')
+names(categories) <- c('Base Category', 'Subcategory A', 'Subcategory B')
+row.names(categories) <- NULL
+```
+Participants were tested on `r length(categories[,1])` categories of familiar animals and artifacts. We gathered 2 color images and 1 natural sound for each subcategory listed in Table 1 from free, online repositories, comprising a total of 4 images and 2 natural sounds for each category. Verbal category label cues were recorded from two speakers (male and female). All auditory cues were trimmed to 600 msec in length.
+
+```{r categories, results='asis'}
+pandoc.table(categories, style='grid', caption='Categories used in Experiments 1A and 1B')
+```
+
+### Procedure
+```{r trials}
+numpractice <- length(raw.tyi[raw.tyi$whichPart=='practice','curTrialIndex'])/N.tyi
+numtest <- length(raw.tyi[raw.tyi$whichPart=='test','curTrialIndex'])/N.tyi
+```
+Participants were instructed to decide as quickly as possible if the picture they saw came from the same category as the word or sound they heard. Trials began with a 250 msec fixation cross. Images appeared 1 second after the offset of the auditory cue and disappeared after each response. Each participant completed `r numpractice` practice trials and `r numtest` test trials. Cue type varied randomly within subjects. On the _matching trials_ (50%), the picture matched the sound at a category level (e.g., `<`ring`>` followed by a picture of a phone), and participants pressed the button for 'Yes' on a gaming controller; otherwise (the word "phone" followed by a picture of a bird), they pressed the button for 'No.' Auditory performance feedback was given after each trial. 
+
+Experiments 1A and 1B differed only in the matching trials with natural sound cues. Matching trials in Experiment 1A were cued with both congruent and incongruent natural sounds; e.g., if a participant heard a `<`cellphone ring`>` cue, she responded 'Yes' to pictures of cellphones (congruent with the sound) and of rotary phones (incongruent with the sound). We conducted Experiment 1B without incongruent sound cues on the matching trials to compare the effectiveness of label cues to that of subcategory congruent natural sound cues directly.
+
+## Results
+```{r clean}
+source('./R/clean.R')
+
+cleaned.tyi <- clean(raw.tyi)
+tyi <- cleaned.tyi$data
+
+# remove motorcycle trials (coding error!)
+miscoded <- ((raw.tyo$seed <= 115) & (raw.tyo$cue_file %in% c('motor_sound_A','motor_sound_B')))
+num_miscoded <- sum(miscoded)
+percet_miscoded <- round(num_miscoded/length(raw.tyo$rt) * 100, 2)
+raw.tyo <- raw.tyo[!miscoded, ]
+cleaned.tyo <- clean(raw.tyo)
+tyo <- cleaned.tyo$data
+```
+Participants performed very accurately overall (Exp. 1A: `r cleaned.tyi$acc`%; Exp. 1B: `r cleaned.tyo$acc`%). Response times (RTs) shorter than 250 msec or longer than 1500 msec were considered errors and removed (Exp. 1A: `r cleaned.tyi$num_removed` trials removed, `r cleaned.tyi$perct_removed`% of total; Exp. 1B: `r cleaned.tyo$num_removed` trials, `r cleaned.tyo$perct_removed`% of total). We fit RTs for correct responses on matching trials with linear mixed regression, including the maximal random effects structure justified by the design [@Barr:2013eh]. Degrees of freedom for the Restricted Maximum Likelihood (REML) linear model parameters were calculated using the Kenward-Roger approximation [@Kenward:1997vs].
+
+```{r stats-prep}
+tyi$exp <- 'tyi'
+tyi$expC <- -0.5
+tyi$cue_typeC <- ifelse(tyi$cue_type=='label', -0.5, 0.5)
+tyi$snd_type <- ifelse(tyi$cue_type=='label', NA, ifelse(tyi$cue_version==tyi$pic_version, 'congruent', 'incongruent'))
+tyi$snd_typeC <- ifelse(tyi$snd_type=='incongruent', -0.5, 0.5)
+tyi$lbl_type <- ifelse(tyi$cue_type=='sound', NA, ifelse(tyi$cue_version=='A', 'female', 'male'))
+tyi$lbl_typeC <- ifelse(tyi$lbl_type=='female', -0.5, 0.5)
+tyi$trial_type <- ifelse(tyi$cue_type=='label', 'label', tyi$snd_type)
+tyi$trialID <- paste(tyi$cue_file, tyi$pic_file, sep=':')
+
+tyo$exp <- 'tyo'
+tyo$expC <- 0.5
+tyo$cue_typeC <- ifelse(tyo$cue_type=='label', -0.5, 0.5)
+tyo$snd_type = ifelse(tyo$cue_type=='label', NA, ifelse(tyo$cue_version==tyo$pic_version, 'congruent', 'incongruent'))
+tyo$snd_typeC <- ifelse(tyo$snd_type=='incongruent', -0.5, 0.5)
+tyo$lbl_type <- ifelse(tyo$cue_type=='sound', NA, ifelse(tyo$cue_version=='A', 'female', 'male'))
+tyo$lbl_typeC <- ifelse(tyo$lbl_type=='female', -0.5, 0.5)
+tyo$trial_type <- ifelse(tyo$cue_type=='label', 'label', tyo$snd_type)
+tyo$trialID <- paste(tyo$cue_file, tyo$pic_file, sep=':')
+
+rows.tyi <- ((tyi$valid_cue==1) & (tyi$isRight==1))
+rows.tyo <- ((tyo$valid_cue==1) & (tyo$isRight==1))
+remove <- c('room', 'responseDevice', 'data', 'initials', 'version', 
+            'date', 'trialIter', 'target_id', 'expTimer')
+
+tyi <- tyi[rows.tyi, !(names(tyi) %in% remove)]
+tyo <- tyo[rows.tyo, !(names(tyo) %in% remove)]
+all <- rbind(tyi, tyo)
+
+write.csv(tyi, './data/tyi-final.csv', row.names=F)
+write.csv(tyo, './data/tyo-final.csv', row.names=F)
+write.csv(all, './data/exp1-final.csv', row.names=F)
+```
+
+```{r load-data}
+source('./R/report_results.R')
+tyi <- read.csv('./data/tyi-final.csv', header=T, stringsAsFactors=F)
+tyo <- read.csv('./data/tyo-final.csv', header=T, stringsAsFactors=F)
+tyo_rep <- read.csv('./data/tyo-rep-final.csv', header=T, stringsAsFactors=F)
+all <- read.csv('./data/exp1-final.csv', header=T, stringsAsFactors=F)
+
+tyo_rep <- plyr::rename(tyo_rep, c("native" = "nativeSpeaker"))
+tyo_rep$expC <- 0.5
+all_rep <- rbind(tyi, tyo_rep)
+write.csv(all_rep, './data/exp1-final-rep.csv', row.names=F)
+```
+
+```{r tyi-sndtype}
+set.seed(111)
+sndtype <- lmer(rt ~ snd_typeC + (1+snd_typeC|subjCode) + (1|trialID), data=tyi[tyi$cue_type == 'sound',])
+sndtype.simple <- lmer(rt ~ 1 + (1+snd_typeC|subjCode) + (1|trialID), data=tyi[tyi$cue_type == 'sound',])
+sndtype.modcomp <- reportModCompChiSqr(sndtype, sndtype.simple, 'snd_typeC')
+sndtype.modcomp['text']
+```
+
+```{r tyi-sndtype-ci}
+sndtype.new <- reportNewStats(sndtype, 'snd_typeC')
+sndtype.new['text']
+```
+
+```{r tyi-cuetype}
+set.seed(222)
+cuetype.tyi <- lmer(rt ~ cue_typeC + (1+cue_typeC|subjCode) + (1|trialID), data=tyi[tyi$trial_type!='incongruent',])
+cuetype.tyi.simple <- lmer(rt ~ 1 + (1+cue_typeC|subjCode) + (1|trialID), data=tyi[tyi$trial_type!='incongruent',])
+cuetype.tyi.modcomp <- reportModCompChiSqr(cuetype.tyi, cuetype.tyi.simple, 'cue_typeC')
+cuetype.tyi.modcomp['text']
+```
+
+```{r tyi-cuetype-ci}
+cuetype.tyi.new <- reportNewStats(cuetype.tyi, 'cue_typeC')
+cuetype.tyi.new['text']
+```
+
+```{r tyo-cuetype}
+set.seed(333)
+cuetype.tyo <- lmer(rt ~ cue_typeC + (1+cue_typeC|subjCode) + (1|trialID), data=tyo)
+cuetype.tyo.simple <- lmer(rt ~ 1 + (1+cue_typeC|subjCode) + (1|trialID), data=tyo)
+cuetype.tyo.modcomp <- reportModCompChiSqr(cuetype.tyo, cuetype.tyo.simple, 'cue_typeC')
+cuetype.tyo.modcomp['text']
+```
+
+```{r tyo-cuetype-new}
+cuetype.tyo.new <- reportNewStats(cuetype.tyo, 'cue_typeC')
+cuetype.tyo.new['text']
+```
+
+```{r exp}
+set.seed(444)
+exp.cue <- lmer(rt ~ cue_typeC + (1+cue_typeC|subjCode) + (1|trialID), data=all[all$trial_type != 'incongruent', ])
+exp.cue.simple <- lmer(rt ~ 1 + (1+cue_typeC|subjCode) + (1|trialID), data=all[all$trial_type != 'incongruent', ])
+exp.cue.modcomp <- reportModCompChiSqr(exp.cue, exp.cue.simple, 'cue_typeC')
+exp.cue.modcomp['text']
+
+exp.inter <- lmer(rt ~ cue_typeC * expC + (1+cue_typeC|subjCode) + (1|trialID), data=all[all$trial_type != 'incongruent', ])
+exp.inter.simple <- lmer(rt ~ cue_typeC * expC - cue_typeC:expC + (1+cue_typeC|subjCode) + (1|trialID), data=all[all$trial_type != 'incongruent', ])
+exp.inter.modcomp <- reportModCompChiSqr(exp.inter, exp.inter.simple, 'cue_typeC:expC')
+exp.inter.modcomp['text']
+```
+
+```{r exp-new}
+exp.cue.new <- reportNewStats(exp.cue, 'cue_typeC')
+exp.cue.new['text']
+
+exp.inter.new <- reportNewStats(exp.inter, 'cue_typeC:expC')
+exp.inter.new['text']
+```
+
+In Experiment 1A, category-matched images were verified reliably faster following subcategory congruent sounds than following subcategory incongruent sounds, `r sndtype.modcomp['text']`. This effect of subcategory congruency did not nullify the label advantage [@Lupyan:2012cp], as images were still verified reliably faster following label cues than following subcategory congruent sounds, `r reportF(cuetype.tyi.df, 'cue_typeC')`. Notably, the label advantage effect was not statistically replicated in Experiment 1B, `r reportF(cuetype.tyo.df, 'cue_typeC')`. However, responses across both experiments were reliably faster following label cues than following congruent sound cues, `r reportModCompF(exp.df)`, which did not vary significantly between the experiments, `r reportModCompF(exp.by.cue.df)`.
+
+The results of Experiments 1A and 1B support our hypothesis that natural sounds activate visual features associated with a specific source---in particular, a member of a visually and aurally distinct subcategory. The results also support our hypothesis that label cues activate concepts _differently_ than natural sound cues: category label cues resulted in faster responses than natural sound cues even when those natural sound cues were more informative about specific visual features of the source than the base category label. However, manipulating congruence by choosing categories with distinct subcategories introduced a confound, namely that each natural sound cue might be less typical than the basic category label. For example, both a `<`yorkie bark`>` and a `<`rottweiler bark`>` might be less typical than a `<`golden retriever bark`>` (just as the words "yorkie" and "rottweiler" are less typical than the word "dog"). In Experiment 2 we address this concern by using a single natural sound cue for each category and varying the temporal dynamics of the relationship.

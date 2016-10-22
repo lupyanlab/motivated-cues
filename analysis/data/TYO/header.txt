@@ -1,0 +1,1 @@
+subjCode	seed	responseDevice	data	room	initials	trialIter	trialID	valid_cue	target_id	cue_type	pic_version	pic_category	pic_type	pic_id	cue_category	cue_version	pic_file	cue_file	block	whichPart	curTrialIndex	expTimer	isRight	rt

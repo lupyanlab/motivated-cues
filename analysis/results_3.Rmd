@@ -1,0 +1,308 @@
+# Experiment 3
+```{r setup, echo=FALSE, message=FALSE}
+opts_chunk$set(cache.path='./cache/exp3/', dev='jpeg', echo=FALSE, 
+               message=FALSE, cache=TRUE, results='hide')
+library(plyr)
+library(reshape2)
+library(pander)
+library(lme4)
+library(AICcmodavg)
+library(ggplot2)
+library(grid)
+library(RColorBrewer)
+library(pbkrtest)
+library(gridExtra)
+library(car)
+```
+In Experiment 3 we investigated the relationships discovered in Experiments 1 and 2 in a paradigm in which participants were not required to respond based on an understanding of the auditory cues. To the extent that natural sounds are associated with a specific source, natural sound cues will guide visual attention toward images that are congruent with the sound.
+
+## Methods
+```{r compile}
+info <- read.csv('./data/TYS/subjectinfo.csv', header=T, stringsAsFactors=F)
+info <- rename(info, c('SubjectID'='subjCode'))
+for(col in paste0('Break.',1:7)) {
+  info[,col] <- ifelse(info[,col] == 'skipped', NA, info[,col])
+  info[,col] <- ifelse(info[,col] == '', NA, info[,col])
+  info[,col] <- as.numeric(info[,col])
+}
+info$num_calibration <- rowSums(!is.na(info[,c('Practice','Real',paste0('Break.',1:7))]))
+info$calibration <- rowMeans(info[,c('Practice','Real',paste0('Break.',1:7))], na.rm=T)
+info <- info[,c('subjCode','num_calibration','calibration')]
+info[is.na(info$calibration), 'num_calibration'] <- NA
+
+qst <- read.csv('./data/TYS/questionnaire.csv', header=T, stringsAsFactors=F)
+keep <- c(names(qst)[2], names(qst)[3], names(qst)[4], names(qst)[10], names(qst)[17])
+qst <- qst[,keep]
+names(qst) <- c('subjCode', 'age', 'gender', 'nativeSpeaker', 'goodVision')
+qst$goodVision <- ifelse(qst$goodVision == "I have glasses or contacts, but didn't wear them today.", 'No', 'Yes')
+qst[!(qst$nativeSpeaker %in% c('Yes','No')), 'nativeSpeaker'] <- 'No'
+
+info <- merge(info, qst, all=T) # TYS_205 and TYS_208 didn't wear their glasses or contacts on the day of the study
+
+rts <- read.csv('data/TYS/latencies.csv', header=T, stringsAsFactors=F)
+info$validSubj <- ifelse(info$subjCode %in% unique(rts$name), TRUE, FALSE)
+info <- info[info$validSubj, ]
+```
+
+### Participants
+```{r participants}
+N <- length(info$subjCode)
+gender <- table(info$gender)
+age <- range(info$age, na.rm=T)
+```
+`r N` University of Wisconsin--Madison undergraduates (`r gender['Female']` female; `r age[1]` to `r age[2]` years old) participated in Experiment 3 in exchange for course credit.
+
+### Materials
+```{r eye-tracking}
+ave_calibration <- mean(info$calibration, na.rm=T)
+num_calibrations <- mean(info$num_calibration, na.rm=T)
+```
+In Experiment 3 we utilized the same materials (auditory cues, images) used in Experiment 2. Visual attention was measured with an Eye Link Desktop unit that sampled monocular eye gaze at 500 Hz.
+
+### Procedure
+```{r trials}
+dur <- read.csv('./data/TYS/durations.csv', header=T, stringsAsFactors=F)
+numpractice <- 10
+numtest <- length(unique(dur$ROW_ID))
+```
+Participants in Experiment 3 searched an array of images for a single target image highlighted with a narrow green frame. Each participant completed `r numpractice` practice trials and `r numtest` test trials. Participants began each trial by viewing a central fixation cross that turned green when fixated, indicating to the participant that they could begin the trial by clicking on the cross (and to the experimenter that the eye tracker was properly calibrated). After the fixation screen, a 2 x 2 grid of images appeared on the screen. The four images presented on each trial were all from a common category of familiar animals and artifacts. As the images appeared, an auditory cue (category label, natural sound) was played through the testing computer's external speakers. The category of the auditory cue matched the category of images on all trials. After 2 seconds, a single, randomly selected image became highlighted by a green frame. Participants ended the trial by clicking on the target image.
+
+## Results
+```{r filter}
+rts <- read.csv('data/TYS/latencies.csv', header=T, stringsAsFactors=F)
+minRT <- 250.0
+maxRT <- median(rts$rt) + 3*sd(rts$rt)
+rt_remove <- ((rts$rt < minRT) | (rts$rt > maxRT))
+rt_num_removed <- sum(rt_remove)
+rt_perct_removed <- (rt_num_removed / length(rt_remove)) * 100
+rt_perct_removed <- round(rt_perct_removed, 1)
+rts$validRT <- !rt_remove
+
+dur <- read.csv('./data/TYS/durations.csv', header=T, stringsAsFactors=F)
+dur_removed <- (rowSums(dur[, c('a','b','c','d')]) == 0)
+dur_num_removed <- sum(dur_removed)
+dur_perct_removed <- (dur_num_removed / length(dur_removed)) * 100
+dur_perct_removed <- round(dur_perct_removed, 1)
+dur$validDur <- !dur_removed
+
+filter <- merge(rts[,c('name','ROW_ID','validRT')], dur[,c('name','ROW_ID','validDur')], by=c('name','ROW_ID'), all=T)
+filter$valid <- (filter$validRT & filter$validDur)
+```
+
+```{r frst-clean}
+frst <- read.csv('./data/TYS/first_fixation.csv', header=T, stringsAsFactors=F)
+frst <- merge(frst, filter, by=c('name','ROW_ID'), all.x=T)
+frst <- frst[frst$validDur, ]
+
+frst$cueTypeC <- ifelse(frst$cueType == 'label', -0.5, 0.5)
+write.csv(frst, './data/tys-firstfix-final.csv', row.names=FALSE)
+```
+
+```{r tmc-clean}
+tmc <- read.csv('./data/TYS/timecourse.csv', header=T, stringsAsFactors=F)
+tmc <- merge(tmc, filter, by=c('name','ROW_ID'), all.x=T)
+tmc <- tmc[tmc$validDur, ]
+
+tmc.ave <- ddply(tmc[tmc$eventImageType != 'none', ], .(name, cueType, ROW_ID), summarize,
+                 zSound = mean(zSound))
+tmc.ave$cueTypeC <- ifelse(tmc.ave$cueType == 'label', -0.5, 0.5)
+write.csv(tmc.ave, './data/tys-average-final.csv', row.names=FALSE)
+
+tmc.prop <- ddply(tmc, .(name, cueType, time_bin), summarize,
+             total = length(ordered_sound),
+             num_a = sum(ordered_sound == 'a', na.rm=T),
+             num_b = sum(ordered_sound == 'b', na.rm=T),
+             num_c = sum(ordered_sound == 'c', na.rm=T),
+             num_d = sum(ordered_sound == 'd', na.rm=T))
+tmc.prop[, paste0('prop_',c('a','b','c','d'))] <- tmc.prop[, paste0('num_',c('a','b','c','d'))] / tmc.prop$total
+tmc.prop <- tmc.prop[, c('name','cueType','time_bin', paste0('prop_',c('a','b','c','d')))]
+tmc.prop <- melt(tmc.prop, idvars=c('name', 'cueType', 'time_bin'), 
+            measure.vars=paste0('prop_',c('a','b','c','d')),
+            variable.name='image', value.name='proportion')
+write.csv(tmc.prop, './data/tys-timecourse-final.csv', row.names=FALSE)
+```
+
+```{r dur-clean}
+dur <- read.csv('./data/TYS/durations.csv', header=T, stringsAsFactors=F)
+dur <- merge(dur, filter, by=c('name','ROW_ID'), all.x=T)
+dur <- dur[dur$valid, ]
+
+dur <- melt(dur, idvars=c('name','ROW_ID','cueType'), measure.vars=c('a','b','c','d'),
+            variable.name='image', value.name='duration')
+ave2 <- dur[,c('name','ROW_ID','cueType','weighted_zSound')]
+
+dur$cueTypeC <- ifelse(dur$cueType == 'label', -0.5, 0.5)
+ave2$cueTypeC <- ifelse(ave2$cueType == 'label', -0.5, 0.5)
+dur$a_v_bcd <- recode(dur$image, "'a'=3/4; c('b','c','d')=-1/4", as.factor.result=FALSE)
+dur$b_v_cd <- recode(dur$image, "'a'=0; 'b'=2/3; c('c','d')=-1/3", as.factor.result=FALSE)
+dur$c_v_d <- recode(dur$image, "c('a','b')=0; 'c'=1/2; 'd'=-1/2", as.factor.result=FALSE)
+write.csv(dur, './data/tys-fixduration-final.csv', row.names=FALSE)
+write.csv(ave2, './data/tys-average-final2.csv', row.names = F)
+```
+
+```{r clear1, cache=FALSE}
+rm(list=ls())
+Sys.sleep(5.0)
+```
+
+```{r frst-read}
+source('./R/report_results.R')
+frst <- read.csv('./data/tys-firstfix-final.csv', header=T, stringsAsFactors=F)
+```
+
+```{r frst}
+onset.cue <- lmer(sinceImageOnset ~ cueTypeC + (1+cueTypeC|name) + (1|ROW_ID), data=frst, REML=F)
+onset.cue.simple <- lmer(sinceImageOnset ~ 1 + (1|name) + (1|ROW_ID), data=frst, REML=F)
+onset.cue.modcomp <- reportModCompChiSqr(onset.cue, onset.cue.simple, 'cueTypeC')
+onset.cue.modcomp['text']
+
+onset.inter <- lmer(sinceImageOnset ~ cueTypeC * zSound + (1+cueTypeC|name) + (1|ROW_ID), data=frst, REML=F)
+onset.inter.simple <- lmer(sinceImageOnset ~ cueTypeC * zSound- cueTypeC:zSound + (1|name) + (1|ROW_ID), data=frst, REML=F)
+onset.inter.modcomp <- reportModCompChiSqr(onset.inter, onset.inter.simple, 'cueTypeC:zSound')
+onset.inter.modcomp['text']
+```
+
+```{r frst-loc}
+frst[grep('_up', frst$eventImageLoc), 'loc_top'] <- 'top'
+frst[grep('_down', frst$eventImageLoc), 'loc_top'] <- 'bottom'
+frst[grep('right_', frst$eventImageLoc), 'loc_side'] <- 'right'
+frst[grep('left_', frst$eventImageLoc), 'loc_side'] <- 'left'
+
+perct_by_loc <- round(table(frst[,c('loc_top','loc_side')]) / length(frst$eventImageLoc) * 100, 2)
+```
+
+```{r ave-read}
+source('./R/report_results.R')
+dur <- read.csv('./data/tys-dur-final.csv', header=T, stringsAsFactors=F)
+ave <- read.csv('./data/tys-average-final.csv', header=T, stringsAsFactors=F)
+```
+
+```{r dur-total}
+set.seed(231)
+dur.cue <- lmer(duration ~ cueTypeC + (1+cueTypeC|name) + (1|ROW_ID), data=dur)
+dur.cue.simple <- lmer(duration ~ 1 + (1+cueTypeC|name) + (1|ROW_ID), data=dur)
+dur.cue.modcomp <- reportModCompChiSqr(dur.cue, dur.cue.simple, 'cueTypeC')
+dur.cue.modcomp['text']
+```
+
+```{r dur-total-new}
+dur.cue.new <- reportNewStats(dur.cue, 'cueTypeC')
+dur.cue.new['text']
+```
+
+```{r ave}
+set.seed(122)
+rating <- lmer(zSound ~ cueTypeC + (1+cueTypeC|name) + (1|ROW_ID), data=ave, REML=F)
+rating.simple <- lmer(zSound ~ 1 + (1+cueTypeC|name) + (1|ROW_ID), data=ave, REML=F)
+rating.modcomp <- reportModCompChiSqr(rating, rating.simple, 'cueTypeC')
+rating.modcomp['text']
+```
+
+```{r ave-new}
+rating.new <- reportNewStats(rating, 'cueTypeC')
+rating.new['text']
+```
+
+```{r test}
+library(lmerTest)
+rating <- lmer(zSound ~ cueTypeC + (1+cueTypeC|name) + (1|ROW_ID), data=ave, REML=F)
+summary(rating)
+
+detach("package:lmerTest", unload=TRUE, force=TRUE)
+library(lme4)
+rating <- lmer(zSound ~ cueTypeC + (1+cueTypeC|name) + (1|ROW_ID), data=ave, REML=F)
+rating.simple <- lmer(zSound ~ 1 + (1+cueTypeC|name) + (1|ROW_ID), data=ave, REML=F)
+rating.modcomp <- reportModCompChiSqr(rating, rating.simple, 'cueTypeC')
+rating.modcomp['text']
+```
+
+```{r ave-2}
+ave2 <- read.csv('./data/tys-average-final2.csv')
+ave2$cue_label <- ifelse(ave2$cueType == 'label', 0, 1)
+ave2$cue_sound <- ifelse(ave2$cueType == 'sound', 0, 1)
+
+rating.snd <- lmer(weighted_zSound ~ cue_sound + (1+cue_sound|name), data = ave2)
+summary(rating.snd)
+
+rating.snd.new <- reportNewStats(rating.snd, '(Intercept)')
+rating.snd.new['text']
+
+rating.lbl <- lmer(weighted_zSound ~ cue_label + (1+cue_label|name), data = ave2)
+summary(rating.lbl)
+
+rating.lbl.new <- reportNewStats(rating.lbl, '(Intercept)')
+rating.lbl.new['text']
+
+rating.mod <- lmer(weighted_zSound ~ cueTypeC + (1+cueTypeC|name), data = ave2)
+summary(rating.mod)
+rating.mod.simple <- update(rating.mod, . ~ . - cueTypeC)
+summary(rating.mod.simple)
+
+rating.mod.comp <- reportModCompChiSqr(rating.mod, rating.mod.simple)
+rating.mod.comp['text']
+
+rating.mod.new <- reportNewStats(rating.mod, 'cueTypeC')
+rating.mod.new['text']
+```
+
+```{r ave-3}
+set.seed(528)
+library(lmerTest)
+rating.snd <- lmer(weighted_zSound ~ 1 + (1|name) + (1|ROW_ID), data = ave2[ave2$cueType == 'sound', ], REML = F)
+summary(rating.snd)
+
+rating.snd.new <- reportNewStats(rating.snd, '(Intercept)')
+rating.snd.new['text']
+
+rating.lbl <- lmer(weighted_zSound ~ 1 + (1|name) + (1|ROW_ID), data = ave2[ave2$cueType == 'label', ], REML = F)
+summary(rating.lbl)
+
+rating.lbl.new <- reportNewStats(rating.lbl, '(Intercept)')
+rating.lbl.new['text']
+
+```
+
+```{r dur}
+dur.image <- lmer(duration ~ cueTypeC * (a_v_bcd + b_v_cd + c_v_d) + (1+cueTypeC|name) + (1|ROW_ID), data=dur)
+dur.image.simple <- lmer(duration ~ cueTypeC * (a_v_bcd + b_v_cd + c_v_d) - cueTypeC:a_v_bcd + (1+cueTypeC|name) + (1|ROW_ID), data=dur)
+dur.image.modcomp <- reportModCompChiSqr(dur.image, dur.image.simple, 'cueTypeC:a_v_bcd')
+dur.image.modcomp['text']
+```
+
+```{r dur-new}
+dur.image.new <- reportNewStats(dur.image, 'cueTypeC:a_v_bcd')
+dur.image.new['text']
+```
+
+```{r dur-comp}
+dur.snd <- dur[dur$cueTypeC == 0.5, ]
+
+dur.image <- lmer(duration ~ a_v_bcd + b_v_cd + c_v_d + (1|name) + (1|ROW_ID), data = dur.snd)
+dur.image.only <- lmer(duration ~ a_v_bcd + (1|name) + (1|ROW_ID), data = dur.snd)
+anova(dur.image, dur.image.only)
+
+
+dur.lbl <- dur[dur$cueTypeC == -0.5, ]
+
+dur.image <- lmer(duration ~ a_v_bcd + b_v_cd + c_v_d + (1|name) + (1|ROW_ID), data = dur.lbl)
+dur.image.only <- lmer(duration ~ a_v_bcd + (1|name) + (1|ROW_ID), data = dur.lbl)
+anova(dur.image, dur.image.only)
+```
+
+
+```{r latencies}
+lat <- read.csv('./data/latencies.csv', header=T)
+lat$cue_typeC <- ifelse(lat$cueType == 'label', -0.5, 0.5)
+
+mod <- lmer(rt ~ cue_typeC + (cue_typeC|name) + (1|ROW_ID), data=lat[lat$rt<3000, ])
+mod.simple <- lmer(rt ~ 1 + (1+cue_typeC|name) + (1|ROW_ID), data=lat[lat$rt<3000, ])
+mod.modcomp <- reportModCompChiSqr(mod, mod.simple, 'cue_typeC')
+
+mod.modcomp['text']
+mod.new <- reportNewStats(mod, 'cue_typeC')
+mod.new['text']
+
+by(lat$rt, lat$cueType, median)
+by(lat$rt, lat$cueType, mean)
+by(lat$rt, lat$cueType, sd)
+```
