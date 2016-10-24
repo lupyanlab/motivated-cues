@@ -1,5 +1,7 @@
 # Experiments 1A and 1B
+
 ```{r setup, echo=FALSE, message=FALSE}
+library(knitr)
 opts_chunk$set(cache.path='./cache/exp1/', dev='jpeg', echo=FALSE, 
                message=FALSE, cache=TRUE, results='hide')
 library(plyr)
@@ -13,7 +15,7 @@ library(pbkrtest)
 ```
 In Experiments 1A and 1B we compared the effectiveness of category labels and natural sounds in cuing target categories of familiar animals and artifacts. Participants were asked to identify images as members of aurally cued categories. To the extent that natural sounds activate visual features of the specific source of the sound, natural sound cues should lead to faster verification of images that are _congruent_ with the sound. We manipulated natural sound-to-image congruence in Experiments 1A and 1B by testing participants using base level categories with two visually and aurally distinct subcategories (Fig. 1). In Experiment 1A we compared the effectiveness of label cues to that of natural sound cues that were either congruent or incongruent with the target image subcategory. In Experiment 1B we removed the sound incongruent trials, comparing label cues to subcategory congruent sounds only.
 
-![Acoustic and electric guitar](figure/guitars.jpg)
+![Acoustic and electric guitar](figure/guitars.png)
 
 ## Methods
 ```{r compile-tyi}
@@ -233,6 +235,6 @@ exp.inter.new <- reportNewStats(exp.inter, 'cue_typeC:expC')
 exp.inter.new['text']
 ```
 
-In Experiment 1A, category-matched images were verified reliably faster following subcategory congruent sounds than following subcategory incongruent sounds, `r sndtype.modcomp['text']`. This effect of subcategory congruency did not nullify the label advantage [@Lupyan:2012cp], as images were still verified reliably faster following label cues than following subcategory congruent sounds, `r reportF(cuetype.tyi.df, 'cue_typeC')`. Notably, the label advantage effect was not statistically replicated in Experiment 1B, `r reportF(cuetype.tyo.df, 'cue_typeC')`. However, responses across both experiments were reliably faster following label cues than following congruent sound cues, `r reportModCompF(exp.df)`, which did not vary significantly between the experiments, `r reportModCompF(exp.by.cue.df)`.
+In Experiment 1A, category-matched images were verified reliably faster following subcategory congruent sounds than following subcategory incongruent sounds, `r sndtype.modcomp['text']`. This effect of subcategory congruency did not nullify the label advantage [@Lupyan:2012cp], as images were still verified reliably faster following label cues than following subcategory congruent sounds. Notably, the label advantage effect was not statistically replicated in Experiment 1B. However, responses across both experiments were reliably faster following label cues than following congruent sound cues, which did not vary significantly between the experiments.
 
 The results of Experiments 1A and 1B support our hypothesis that natural sounds activate visual features associated with a specific source---in particular, a member of a visually and aurally distinct subcategory. The results also support our hypothesis that label cues activate concepts _differently_ than natural sound cues: category label cues resulted in faster responses than natural sound cues even when those natural sound cues were more informative about specific visual features of the source than the base category label. However, manipulating congruence by choosing categories with distinct subcategories introduced a confound, namely that each natural sound cue might be less typical than the basic category label. For example, both a `<`yorkie bark`>` and a `<`rottweiler bark`>` might be less typical than a `<`golden retriever bark`>` (just as the words "yorkie" and "rottweiler" are less typical than the word "dog"). In Experiment 2 we address this concern by using a single natural sound cue for each category and varying the temporal dynamics of the relationship.

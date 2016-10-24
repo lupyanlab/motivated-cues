@@ -1,5 +1,6 @@
 # Experiment 3
 ```{r setup, echo=FALSE, message=FALSE}
+library(knitr)
 opts_chunk$set(cache.path='./cache/exp3/', dev='jpeg', echo=FALSE, 
                message=FALSE, cache=TRUE, results='hide')
 library(plyr)

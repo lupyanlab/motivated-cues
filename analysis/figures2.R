@@ -2,7 +2,6 @@ library(plyr)
 library(ggplot2)
 library(grid)
 library(gridExtra)
-source('./R/withinsubjerror.R')
 
 library(RColorBrewer)
 col.label <- brewer.pal(3, 'Reds')[3]
@@ -11,9 +10,12 @@ col.congr <- brewer.pal(5, 'Blues')[5]
 cols.labels <- rev(brewer.pal(5, 'Reds')[2:5])
 cols.sounds <- rev(brewer.pal(5, 'Blues')[2:5])
 
+library(motivatedcues)
+
 # Experiment 1
 ##############################################################################
-exp1 <- read.csv('./data/exp1-final-rep.csv', header=T, stringsAsFactors=F)
+data("exp1_final_rep")
+exp1 <- exp1_final_rep
 exp1$trial_type <- factor(exp1$trial_type, levels=c('label','congruent', 'incongruent'), ordered=T)
 exp1$exp <- factor(exp1$exp, levels=c('tyi','tyo-rep'), ordered=T)
 
@@ -37,13 +39,7 @@ plot.exp1 <- ggplot(exp1.bar, aes(x=exp, y=rt, fill=trial_type)) +
         axis.ticks.length=unit(5, units='points'),
         axis.ticks.x=element_blank())
 
-jpeg('~/Desktop/plot-exp1-rep.jpg', width=3.5, height=3.5, units='in', res=200)
 plot.exp1
-dev.off()
-
-pdf('~/Desktop/plot-exp1-rep.pdf', width=3.5, height=3.5)
-print(plot.exp1)
-dev.off()
 
 # Experiment 2
 ##############################################################################
