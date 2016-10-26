@@ -7,10 +7,10 @@
 #'   na.rm: a boolean that indicates whether to ignore NA's
 #'   conf.interval: the percent range of the confidence interval (default is 95%)
 #'
+#' @import plyr
 #' @export
 summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
                       conf.interval=.95, .drop=TRUE) {
-    require(plyr)
 
     # New version of length which can handle NA's: if na.rm==T, don't count them
     length2 <- function (x, na.rm=FALSE) {
@@ -54,10 +54,10 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
 #'   betweenvars: a vector containing names of columns that are between-subjects variables
 #'   na.rm: a boolean that indicates whether to ignore NA's
 #'
+#' @import plyr
 #' @export
 normDataWithin <- function(data=NULL, idvar, measurevar, betweenvars=NULL,
                            na.rm=FALSE, .drop=TRUE) {
-    require(plyr)
 
     # Measure var on left, idvar + between vars on right of formula.
     data.subjMean <- ddply(data, c(idvar, betweenvars), .drop=.drop,

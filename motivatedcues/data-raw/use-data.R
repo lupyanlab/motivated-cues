@@ -11,6 +11,11 @@ for(path in data_files) {
   assign(name, frame)
 }
 
+imageratings <- read_csv("data-raw/TYP/imageratings.csv")
+
 use_data(
-  exp1_final_rep
+  exp1_final_rep,
+  typ_final,
+  imageratings,
+  overwrite = TRUE
 )

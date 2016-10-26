@@ -3,3 +3,4 @@
 export(normDataWithin)
 export(summarySE)
 export(summarySEwithin)
+import(plyr)
