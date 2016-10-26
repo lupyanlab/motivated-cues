@@ -1,9 +1,11 @@
 digraph {
   rankdir=LR;
   node[fontname=Helvetica, width=1, fontsize=20];
-  {cue, picture} -> question;
-  cue[image="img/sound.png", label="", shape=none];
+  picture -> question;
+  cue -> invis[style=invis];
 
+  cue[image="img/sound.png", label="", shape=none];
+  invis[style=invis];
   question[shape=none, label="Y / N ?"];
   picture[shape=square];
 }
